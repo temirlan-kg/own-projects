@@ -235,9 +235,9 @@ async def uni_major(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return UNI_MAJOR
 
     context.user_data["major"] = major
-    await (update.message.reply_text
-           ("Качан окууну баштагыңыз келет? (мисалы: кийинки семестр / 2026/2027 / мүмкүн болушунча эртерээк)",
-        reply_markup=cancel_kb()
+    await update.message.reply_text(
+        "Качан окууну баштагыңыз келет? (мисалы: кийинки семестр / 2026/2027 / мүмкүн болушунча эртерээк)",
+        reply_markup=cancel_kb(),
     )
     return UNI_START
 
@@ -251,13 +251,13 @@ async def uni_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     summary = (
         "✅ Сураныч, текшериңиз:\n\n"
-        "Flow: Штудиенколлег / Университет\n"
-        f"Name: {context.user_data['name']}\n"
-        f"Kontakt: {context.user_data['contact']}\n"
-        f"Ziel: {context.user_data['target']}\n"
-        f"Ort: {context.user_data['city']}\n"
-        f"Fach: {context.user_data['major']}\n"
-        f"Start: {context.user_data['start']}\n\n"
+        "Багыт: Штудиенколлег / Университет\n"
+        f"Аты-жөнү: {context.user_data['name']}\n"
+        f"Байланыш: {context.user_data['contact']}\n"
+        f"Максаты: {context.user_data['target']}\n"
+        f"Шаар / Өлкө: {context.user_data['city']}\n"
+        f"Адистиги: {context.user_data['major']}\n"
+        f"Баштоо убактысы: {context.user_data['start']}\n\n"
         "Баары туура болсо, «Катталуу» баскычын басыңыз."
     )
 
@@ -328,12 +328,19 @@ async def ger_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["contact"] = contact
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("A1", callback_data="level_A1"),
-         InlineKeyboardButton("A2", callback_data="level_A2"),
-         InlineKeyboardButton("B1", callback_data="level_B1")],
-         InlineKeyboardButton("🤷‍♂️ Билбейм", callback_data="level_unknown")],
-        [InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")],
+        [
+            InlineKeyboardButton("A1", callback_data="level_A1"),
+            InlineKeyboardButton("A2", callback_data="level_A2"),
+            InlineKeyboardButton("B1", callback_data="level_B1"),
+        ],
+        [
+            InlineKeyboardButton("🤷‍♂️ Билбейм", callback_data="level_unknown")
+        ],
+        [
+            InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")
+        ],
     ])
+
     await update.message.reply_text("Сизге кайсы деңгээл керек?", reply_markup=kb)
     return GER_LEVEL
 
@@ -383,13 +390,13 @@ async def ger_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     summary = (
         "✅ Сураныч, текшериңиз:\n\n"
-        "Flow: Немис курсу\n"
-        f"Name: {context.user_data['name']}\n"
-        f"Kontakt: {context.user_data['contact']}\n"
-        f"Niveau: {context.user_data['level']}\n"
-        f"Format: {context.user_data['format']}\n"
-        f"Start: {context.user_data['start']}\n\n"
-        "Wenn alles stimmt, klicke **Anmelden**."
+        "Багыт: Немис курсу\n"
+        f"Аты-жөнү: {context.user_data['name']}\n"
+        f"Байланыш: {context.user_data['contact']}\n"
+        f"Деңгээл: {context.user_data['level']}\n"
+        f"Формат: {context.user_data['format']}\n"
+        f"Баштоо убактысы: {context.user_data['start']}\n\n"
+        "Баары туура болсо, «Катталуу» баскычын басыңыз."
     )
 
     context.user_data["summary"] = summary
