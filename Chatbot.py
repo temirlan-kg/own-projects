@@ -1,12 +1,9 @@
+import asyncio
 import logging
 import sqlite3
 from datetime import datetime
 
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -20,12 +17,13 @@ from telegram.ext import (
 # ======================
 # CONFIG
 # ======================
-BOT_TOKEN = "8171121939:AAFA6dxk-EOSkrfuavwXZhTOcV94HIhawj0"
-# Admin Chat ID bekommst du z.B. über @userinfobot oder indem du dir /start im Bot loggst
+BOT_TOKEN = "8171121939:AAGYMWu2Up1bkZMTgYeePnLem1U3UyZRY3c"
 ADMIN_CHAT_ID = 703296214
-
 DB_PATH = "signups.db"
 
+# ======================
+# LOGGING
+# ======================
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
@@ -44,10 +42,10 @@ def init_db():
             created_at TEXT NOT NULL,
             user_id INTEGER,
             username TEXT,
-            flow TEXT NOT NULL,            -- "uni" or "german"
+            flow TEXT NOT NULL,
             name TEXT NOT NULL,
             contact TEXT NOT NULL,
-            details TEXT NOT NULL           -- stored as plain text summary
+            details TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -86,7 +84,7 @@ def save_signup(user_id: int, username: str, flow: str, name: str, contact: str,
 ) = range(14)
 
 # ======================
-# HELPERS
+# HELPERS / KEYBOARDS
 # ======================
 def main_menu_kb():
     return InlineKeyboardMarkup([
@@ -96,9 +94,7 @@ def main_menu_kb():
     ])
 
 def cancel_kb():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]
-    ])
+    return InlineKeyboardMarkup([[InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]])
 
 def confirm_kb(confirm_data: str):
     return InlineKeyboardMarkup([
@@ -110,6 +106,9 @@ def confirm_kb(confirm_data: str):
 def clean_user_text(text: str) -> str:
     return (text or "").strip()
 
+# ======================
+# GENERIC HANDLERS
+# ======================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Hi! 👋 Ich bin der Beratungs-Bot.\n\nWobei kann ich helfen?",
@@ -120,10 +119,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def menu_from_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(
-        "Wähle bitte eine Option:",
-        reply_markup=main_menu_kb(),
-    )
+    await query.edit_message_text("Wähle bitte eine Option:", reply_markup=main_menu_kb())
     return CHOOSE_FLOW
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -134,14 +130,11 @@ async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- Hier kannst du Beratung anfragen und dich anmelden.\n"
         "- Deine Angaben werden nur für die Kontaktaufnahme genutzt.\n\n"
         "Drücke unten, um zurückzugehen.",
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("↩️ Zurück", callback_data="back_menu")]
-        ])
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("↩️ Zurück", callback_data="back_menu")]]),
     )
     return CHOOSE_FLOW
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # works for callback and message
     if update.callback_query:
         await update.callback_query.answer()
         await update.callback_query.edit_message_text("Abgebrochen. 👌", reply_markup=main_menu_kb())
@@ -152,7 +145,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CHOOSE_FLOW
 
 # ======================
-# UNI FLOW
+# FLOW SELECTION
 # ======================
 async def choose_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -175,6 +168,9 @@ async def choose_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return CHOOSE_FLOW
 
+# ======================
+# UNI FLOW
+# ======================
 async def uni_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = clean_user_text(update.message.text)
     if len(name) < 2:
@@ -182,7 +178,10 @@ async def uni_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return UNI_NAME
 
     context.user_data["name"] = name
-    await update.message.reply_text("Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)", reply_markup=cancel_kb())
+    await update.message.reply_text(
+        "Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)",
+        reply_markup=cancel_kb()
+    )
     return UNI_CONTACT
 
 async def uni_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -197,7 +196,7 @@ async def uni_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Studienkolleg", callback_data="uni_target_stk")],
         [InlineKeyboardButton("Universität", callback_data="uni_target_uni")],
         [InlineKeyboardButton("Beides / noch unsicher", callback_data="uni_target_both")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]
+        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
     ])
     await update.message.reply_text("Was ist dein Ziel?", reply_markup=kb)
     return UNI_TARGET
@@ -223,7 +222,10 @@ async def uni_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return UNI_CITY
 
     context.user_data["city"] = city
-    await update.message.reply_text("Welche Fachrichtung interessiert dich? (z.B. Informatik, BWL, Medizin ...)", reply_markup=cancel_kb())
+    await update.message.reply_text(
+        "Welche Fachrichtung interessiert dich? (z.B. Informatik, BWL, Medizin ...)",
+        reply_markup=cancel_kb()
+    )
     return UNI_MAJOR
 
 async def uni_major(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -233,7 +235,10 @@ async def uni_major(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return UNI_MAJOR
 
     context.user_data["major"] = major
-    await update.message.reply_text("Wann möchtest du starten? (z.B. nächstes Semester / 2026 / so früh wie möglich)", reply_markup=cancel_kb())
+    await update.message.reply_text(
+        "Wann möchtest du starten? (z.B. nächstes Semester / 2026 / so früh wie möglich)",
+        reply_markup=cancel_kb()
+    )
     return UNI_START
 
 async def uni_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -246,7 +251,7 @@ async def uni_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     summary = (
         "✅ Bitte prüfen:\n\n"
-        f"Flow: Studienkolleg/Uni\n"
+        "Flow: Studienkolleg/Uni\n"
         f"Name: {context.user_data['name']}\n"
         f"Kontakt: {context.user_data['contact']}\n"
         f"Ziel: {context.user_data['target']}\n"
@@ -266,28 +271,26 @@ async def uni_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "uni_confirm":
         u = query.from_user
+
         save_signup(
             user_id=u.id,
             username=u.username or "",
             flow="uni",
-            name=context.user_data["name"],
-            contact=context.user_data["contact"],
-            details=context.user_data["summary"],
+            name=context.user_data.get("name", ""),
+            contact=context.user_data.get("contact", ""),
+            details=context.user_data.get("summary", ""),
         )
 
-        # Admin notification
-        admin_msg = (
-            "📩 Neue Anmeldung (Uni/Studienkolleg)\n\n"
-            f"User: @{u.username}" if u.username else f"User ID: {u.id}"
-        )
-        admin_msg += "\n\n" + context.user_data["summary"]
+        who = f"User: @{u.username}" if u.username else f"User ID: {u.id}"
+        admin_msg = "📩 Neue Anmeldung (Uni/Studienkolleg)\n\n" + who + "\n\n" + context.user_data.get("summary", "")
 
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_msg)
         except Exception as e:
             logger.warning("Admin notify failed: %s", e)
 
-        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.", reply_markup=main_menu_kb())
+        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.",
+                                      reply_markup=main_menu_kb())
         context.user_data.clear()
         return CHOOSE_FLOW
 
@@ -310,7 +313,10 @@ async def ger_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return GER_NAME
 
     context.user_data["name"] = name
-    await update.message.reply_text("Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)", reply_markup=cancel_kb())
+    await update.message.reply_text(
+        "Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)",
+        reply_markup=cancel_kb()
+    )
     return GER_CONTACT
 
 async def ger_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -328,7 +334,7 @@ async def ger_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("B2", callback_data="level_B2"),
          InlineKeyboardButton("C1", callback_data="level_C1"),
          InlineKeyboardButton("Weiß nicht", callback_data="level_unknown")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]
+        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
     ])
     await update.message.reply_text("Welches Niveau brauchst du?", reply_markup=kb)
     return GER_LEVEL
@@ -351,7 +357,7 @@ async def ger_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Online", callback_data="format_online")],
         [InlineKeyboardButton("Präsenz", callback_data="format_offline")],
         [InlineKeyboardButton("Egal", callback_data="format_any")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]
+        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
     ])
     await query.edit_message_text("Welches Kursformat möchtest du?", reply_markup=kb)
     return GER_FORMAT
@@ -367,7 +373,8 @@ async def ger_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     context.user_data["format"] = mapping.get(query.data, "Egal")
 
-    await query.edit_message_text("Wann möchtest du starten? (z.B. sofort / Januar / nächstes Monat)", reply_markup=cancel_kb())
+    await query.edit_message_text("Wann möchtest du starten? (z.B. sofort / Januar / nächstes Monat)",
+                                  reply_markup=cancel_kb())
     return GER_START
 
 async def ger_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -380,7 +387,7 @@ async def ger_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     summary = (
         "✅ Bitte prüfen:\n\n"
-        f"Flow: Deutschkurs\n"
+        "Flow: Deutschkurs\n"
         f"Name: {context.user_data['name']}\n"
         f"Kontakt: {context.user_data['contact']}\n"
         f"Niveau: {context.user_data['level']}\n"
@@ -399,27 +406,26 @@ async def ger_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "ger_confirm":
         u = query.from_user
+
         save_signup(
             user_id=u.id,
             username=u.username or "",
             flow="german",
-            name=context.user_data["name"],
-            contact=context.user_data["contact"],
-            details=context.user_data["summary"],
+            name=context.user_data.get("name", ""),
+            contact=context.user_data.get("contact", ""),
+            details=context.user_data.get("summary", ""),
         )
 
-        admin_msg = (
-            "📩 Neue Anmeldung (Deutschkurs)\n\n"
-            f"User: @{u.username}" if u.username else f"User ID: {u.id}"
-        )
-        admin_msg += "\n\n" + context.user_data["summary"]
+        who = f"User: @{u.username}" if u.username else f"User ID: {u.id}"
+        admin_msg = "📩 Neue Anmeldung (Deutschkurs)\n\n" + who + "\n\n" + context.user_data.get("summary", "")
 
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_msg)
         except Exception as e:
             logger.warning("Admin notify failed: %s", e)
 
-        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.", reply_markup=main_menu_kb())
+        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.",
+                                      reply_markup=main_menu_kb())
         context.user_data.clear()
         return CHOOSE_FLOW
 
@@ -433,7 +439,13 @@ async def ger_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CHOOSE_FLOW
 
 # ======================
-# RUN APP
+# ERROR HANDLER
+# ======================
+async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.exception("Unhandled error", exc_info=context.error)
+
+# ======================
+# BUILD APP
 # ======================
 def build_app() -> Application:
     app = Application.builder().token(BOT_TOKEN).build()
@@ -442,47 +454,64 @@ def build_app() -> Application:
         entry_points=[CommandHandler("start", start)],
         states={
             CHOOSE_FLOW: [
-                CallbackQueryHandler(choose_flow),
+                CallbackQueryHandler(choose_flow, pattern="^(flow_uni|flow_german|info)$"),
+                CallbackQueryHandler(menu_from_query, pattern="^back_menu$"),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),
             ],
 
             UNI_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, uni_name)],
             UNI_CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, uni_contact)],
-            UNI_TARGET: [CallbackQueryHandler(uni_target)],
+            UNI_TARGET: [
+                CallbackQueryHandler(uni_target, pattern="^uni_target_"),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),
+            ],
             UNI_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, uni_city)],
             UNI_MAJOR: [MessageHandler(filters.TEXT & ~filters.COMMAND, uni_major)],
             UNI_START: [MessageHandler(filters.TEXT & ~filters.COMMAND, uni_start)],
-            UNI_CONFIRM: [CallbackQueryHandler(uni_confirm)],
+            UNI_CONFIRM: [CallbackQueryHandler(uni_confirm, pattern="^(uni_confirm|back_menu|cancel)$")],
 
             GER_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, ger_name)],
             GER_CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ger_contact)],
-            GER_LEVEL: [CallbackQueryHandler(ger_level)],
-            GER_FORMAT: [CallbackQueryHandler(ger_format)],
+            GER_LEVEL: [
+                CallbackQueryHandler(ger_level, pattern="^level_"),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),
+            ],
+            GER_FORMAT: [
+                CallbackQueryHandler(ger_format, pattern="^format_"),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),
+            ],
             GER_START: [MessageHandler(filters.TEXT & ~filters.COMMAND, ger_start)],
-            GER_CONFIRM: [CallbackQueryHandler(ger_confirm)],
+            GER_CONFIRM: [CallbackQueryHandler(ger_confirm, pattern="^(ger_confirm|back_menu|cancel)$")],
         },
-        fallbacks=[
-            CallbackQueryHandler(cancel, pattern="^cancel$"),
-            CommandHandler("cancel", cancel),
-            CallbackQueryHandler(menu_from_query, pattern="^back_menu$"),
-        ],
+        fallbacks=[CommandHandler("cancel", cancel)],
         name="signup_conversation",
         persistent=False,
     )
 
     app.add_handler(conv)
-    app.add_handler(CallbackQueryHandler(menu_from_query, pattern="^back_menu$"))
-    app.add_handler(CallbackQueryHandler(cancel, pattern="^cancel$"))
-    app.add_handler(CallbackQueryHandler(info, pattern="^info$"))
+    app.add_error_handler(on_error)
     return app
 
-def main():
+# ======================
+# ASYNC START (stable on Python 3.14)
+# ======================
+async def main_async():
+    if not BOT_TOKEN or BOT_TOKEN == "PASTE_YOUR_NEW_TOKEN_HERE":
+        raise RuntimeError("Bitte BOT_TOKEN oben eintragen (neuen Token von BotFather).")
+
     init_db()
     app = build_app()
+
+    # sauberer Start ohne Application.run_polling()
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+
     print("✅ Bot läuft... Drücke CTRL+C zum Stoppen.")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    await asyncio.Event().wait()  # läuft für immer
+
+def main():
+    asyncio.run(main_async())
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.set_event_loop(asyncio.new_event_loop())
     main()
-
