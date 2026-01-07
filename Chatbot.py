@@ -88,19 +88,19 @@ def save_signup(user_id: int, username: str, flow: str, name: str, contact: str,
 # ======================
 def main_menu_kb():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎓 Studienkolleg / Uni Beratung", callback_data="flow_uni")],
-        [InlineKeyboardButton("🇩🇪 Deutschkurs", callback_data="flow_german")],
-        [InlineKeyboardButton("ℹ️ Kontakt / Info", callback_data="info")],
+        [InlineKeyboardButton("🎓 Штудиенколлег / Университет", callback_data="flow_uni")],
+        [InlineKeyboardButton("🇩🇪 Немис курсу", callback_data="flow_german")],
+        [InlineKeyboardButton("📞 Байланыш/ ℹ️ Маалымат:", callback_data="info")],
     ])
 
 def cancel_kb():
-    return InlineKeyboardMarkup([[InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")]])
+    return InlineKeyboardMarkup([[InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")]])
 
 def confirm_kb(confirm_data: str):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("✅ Anmelden", callback_data=confirm_data)],
-        [InlineKeyboardButton("↩️ Zurück zum Menü", callback_data="back_menu")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
+        [InlineKeyboardButton("✅ Катталуу", callback_data=confirm_data)],
+        [InlineKeyboardButton("↩️ Менюга кайтуу", callback_data="back_menu")],
+        [InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")],
     ])
 
 def clean_user_text(text: str) -> str:
@@ -111,7 +111,7 @@ def clean_user_text(text: str) -> str:
 # ======================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Hi! 👋 Ich bin der Beratungs-Bot.\n\nWobei kann ich helfen?",
+        "Салам! 👋 Мен консультация берүүчү ботмун.\n\nСизге кандай жардам бере алам?",
         reply_markup=main_menu_kb(),
     )
     return CHOOSE_FLOW
@@ -119,27 +119,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def menu_from_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text("Wähle bitte eine Option:", reply_markup=main_menu_kb())
+    await query.edit_message_text("Төмөндөн бир вариантты тандаңыз:", reply_markup=main_menu_kb())
     return CHOOSE_FLOW
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(
-        "ℹ️ Info:\n"
-        "- Hier kannst du Beratung anfragen und dich anmelden.\n"
-        "- Deine Angaben werden nur für die Kontaktaufnahme genutzt.\n\n"
-        "Drücke unten, um zurückzugehen.",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("↩️ Zurück", callback_data="back_menu")]]),
+        "ℹ️ Маалымат:\n"
+        "- Бул жерден консультацияга кайрылып, каттала аласыз.\n"
+        "- Сиздин маалыматтар байланыш үчүн гана колдонулат.\n\n"
+        "Артка кайтуу үчүн төмөндөгү баскычты басыңыз.",
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("↩️ Артка", callback_data="back_menu")]]),
     )
     return CHOOSE_FLOW
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         await update.callback_query.answer()
-        await update.callback_query.edit_message_text("Abgebrochen. 👌", reply_markup=main_menu_kb())
+        await update.callback_query.edit_message_text("Жокко чыгарылды. 👌", reply_markup=main_menu_kb())
     else:
-        await update.message.reply_text("Abgebrochen. 👌", reply_markup=main_menu_kb())
+        await update.message.reply_text("Жокко чыгарылды. 👌", reply_markup=main_menu_kb())
 
     context.user_data.clear()
     return CHOOSE_FLOW
@@ -154,13 +154,13 @@ async def choose_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "flow_uni":
         context.user_data.clear()
         context.user_data["flow"] = "uni"
-        await query.edit_message_text("🎓 Super! Wie heißt du? (Vorname reicht)", reply_markup=cancel_kb())
+        await query.edit_message_text("🎓 Супер! Атың ким? (Атыңды гана жазсаң жетиштүү)", reply_markup=cancel_kb())
         return UNI_NAME
 
     if query.data == "flow_german":
         context.user_data.clear()
         context.user_data["flow"] = "german"
-        await query.edit_message_text("🇩🇪 Super! Wie heißt du? (Vorname reicht)", reply_markup=cancel_kb())
+        await query.edit_message_text("🇩🇪 Супер! Атың ким? (Атыңды гана жазсаң жетиштүү)", reply_markup=cancel_kb())
         return GER_NAME
 
     if query.data == "info":
@@ -174,12 +174,12 @@ async def choose_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def uni_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = clean_user_text(update.message.text)
     if len(name) < 2:
-        await update.message.reply_text("Bitte gib einen gültigen Namen ein 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, жарактуу ат жазыңыз. 🙂", reply_markup=cancel_kb())
         return UNI_NAME
 
     context.user_data["name"] = name
     await update.message.reply_text(
-        "Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)",
+        "Рахмат! Сиз менен кантип байланышсак болот? (WhatsApp номери же Telegram @аты)",
         reply_markup=cancel_kb()
     )
     return UNI_CONTACT
@@ -187,18 +187,18 @@ async def uni_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def uni_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact = clean_user_text(update.message.text)
     if len(contact) < 5:
-        await update.message.reply_text("Bitte gib eine gültige Kontaktmöglichkeit ein 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, жарактуу байланыш маалыматын жазыңыз 🙂", reply_markup=cancel_kb())
         return UNI_CONTACT
 
     context.user_data["contact"] = contact
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Studienkolleg", callback_data="uni_target_stk")],
-        [InlineKeyboardButton("Universität", callback_data="uni_target_uni")],
-        [InlineKeyboardButton("Beides / noch unsicher", callback_data="uni_target_both")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
+        [InlineKeyboardButton("Штудиенколлег", callback_data="uni_target_stk")],
+        [InlineKeyboardButton("Университет", callback_data="uni_target_uni")],
+        [InlineKeyboardButton("Экөө тең / Так эмес", callback_data="uni_target_both")],
+        [InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")],
     ])
-    await update.message.reply_text("Was ist dein Ziel?", reply_markup=kb)
+    await update.message.reply_text("Сиздин максатыңыз эмне??", reply_markup=kb)
     return UNI_TARGET
 
 async def uni_target(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -206,24 +206,24 @@ async def uni_target(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     mapping = {
-        "uni_target_stk": "Studienkolleg",
-        "uni_target_uni": "Universität",
-        "uni_target_both": "Beides/unsicher",
+        "uni_target_stk": "Штудиенколлег",
+        "uni_target_uni": "Университет",
+        "uni_target_both": "Экөө тең / Так эмес",
     }
-    context.user_data["target"] = mapping.get(query.data, "Unbekannt")
+    context.user_data["target"] = mapping.get(query.data, "Белгисиз")
 
-    await query.edit_message_text("In welcher Stadt / in welchem Land möchtest du studieren?", reply_markup=cancel_kb())
+    await query.edit_message_text("Кайсы шаарда же кайсы өлкөдө окууну каалайсыз?", reply_markup=cancel_kb())
     return UNI_CITY
 
 async def uni_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = clean_user_text(update.message.text)
     if len(city) < 2:
-        await update.message.reply_text("Bitte gib Stadt/Land an 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, шаарды / өлкөнү жазыңыз 🙂", reply_markup=cancel_kb())
         return UNI_CITY
 
     context.user_data["city"] = city
     await update.message.reply_text(
-        "Welche Fachrichtung interessiert dich? (z.B. Informatik, BWL, Medizin ...)",
+        "Кайсы адистик сизди кызыктырат? (мисалы: информатика, бизнес, медицина …)",
         reply_markup=cancel_kb()
     )
     return UNI_MAJOR
@@ -231,12 +231,12 @@ async def uni_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def uni_major(update: Update, context: ContextTypes.DEFAULT_TYPE):
     major = clean_user_text(update.message.text)
     if len(major) < 2:
-        await update.message.reply_text("Bitte gib eine Fachrichtung an 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, адистикти жазыңыз 🙂", reply_markup=cancel_kb())
         return UNI_MAJOR
 
     context.user_data["major"] = major
-    await update.message.reply_text(
-        "Wann möchtest du starten? (z.B. nächstes Semester / 2026 / so früh wie möglich)",
+    await (update.message.reply_text
+           ("Качан окууну баштагыңыз келет? (мисалы: кийинки семестр / 2026/2027 / мүмкүн болушунча эртерээк)",
         reply_markup=cancel_kb()
     )
     return UNI_START
@@ -244,21 +244,21 @@ async def uni_major(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def uni_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     start_time = clean_user_text(update.message.text)
     if len(start_time) < 2:
-        await update.message.reply_text("Bitte gib einen Startzeitpunkt an 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, баштоо убактысын жазыңыз 🙂", reply_markup=cancel_kb())
         return UNI_START
 
     context.user_data["start"] = start_time
 
     summary = (
-        "✅ Bitte prüfen:\n\n"
-        "Flow: Studienkolleg/Uni\n"
+        "✅ Сураныч, текшериңиз:\n\n"
+        "Flow: Штудиенколлег / Университет\n"
         f"Name: {context.user_data['name']}\n"
         f"Kontakt: {context.user_data['contact']}\n"
         f"Ziel: {context.user_data['target']}\n"
         f"Ort: {context.user_data['city']}\n"
         f"Fach: {context.user_data['major']}\n"
         f"Start: {context.user_data['start']}\n\n"
-        "Wenn alles stimmt, klicke **Anmelden**."
+        "Баары туура болсо, «Катталуу» баскычын басыңыз."
     )
 
     context.user_data["summary"] = summary
@@ -282,14 +282,14 @@ async def uni_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         who = f"User: @{u.username}" if u.username else f"User ID: {u.id}"
-        admin_msg = "📩 Neue Anmeldung (Uni/Studienkolleg)\n\n" + who + "\n\n" + context.user_data.get("summary", "")
+        admin_msg = "📩 Жаңы катталуу (Университет / Штудиенколлег)\n\n" + who + "\n\n" + context.user_data.get("summary", "")
 
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_msg)
         except Exception as e:
             logger.warning("Admin notify failed: %s", e)
 
-        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.",
+        await query.edit_message_text("🎉 Рахмат! Катталуу ийгиликтүү болду. Жакында сизге байланышабыз 🙂.",
                                       reply_markup=main_menu_kb())
         context.user_data.clear()
         return CHOOSE_FLOW
@@ -309,12 +309,12 @@ async def uni_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ger_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = clean_user_text(update.message.text)
     if len(name) < 2:
-        await update.message.reply_text("Bitte gib einen gültigen Namen ein 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, жарактуу ат жазыңыз 🙂", reply_markup=cancel_kb())
         return GER_NAME
 
     context.user_data["name"] = name
     await update.message.reply_text(
-        "Danke! Wie kann ich dich erreichen? (WhatsApp Nummer oder Telegram @name)",
+        "Рахмат! Сиз менен кантип байланышсак болот? (WhatsApp номери же Telegram @аты)",
         reply_markup=cancel_kb()
     )
     return GER_CONTACT
@@ -322,7 +322,7 @@ async def ger_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ger_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact = clean_user_text(update.message.text)
     if len(contact) < 5:
-        await update.message.reply_text("Bitte gib eine gültige Kontaktmöglichkeit ein 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, жарактуу байланыш маалыматын жазыңыз 🙂", reply_markup=cancel_kb())
         return GER_CONTACT
 
     context.user_data["contact"] = contact
@@ -331,12 +331,10 @@ async def ger_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("A1", callback_data="level_A1"),
          InlineKeyboardButton("A2", callback_data="level_A2"),
          InlineKeyboardButton("B1", callback_data="level_B1")],
-        [InlineKeyboardButton("B2", callback_data="level_B2"),
-         InlineKeyboardButton("C1", callback_data="level_C1"),
-         InlineKeyboardButton("Weiß nicht", callback_data="level_unknown")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
+         InlineKeyboardButton("🤷‍♂️ Билбейм", callback_data="level_unknown")],
+        [InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")],
     ])
-    await update.message.reply_text("Welches Niveau brauchst du?", reply_markup=kb)
+    await update.message.reply_text("Сизге кайсы деңгээл керек?", reply_markup=kb)
     return GER_LEVEL
 
 async def ger_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -354,12 +352,10 @@ async def ger_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["level"] = mapping.get(query.data, "Unklar")
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Online", callback_data="format_online")],
-        [InlineKeyboardButton("Präsenz", callback_data="format_offline")],
-        [InlineKeyboardButton("Egal", callback_data="format_any")],
-        [InlineKeyboardButton("❌ Abbrechen", callback_data="cancel")],
+        [InlineKeyboardButton("Онлайн", callback_data="format_online")],
+        [InlineKeyboardButton("❌ Жокко чыгаруу", callback_data="cancel")],
     ])
-    await query.edit_message_text("Welches Kursformat möchtest du?", reply_markup=kb)
+    await query.edit_message_text("Кайсы форматтагы курс каалайсың?", reply_markup=kb)
     return GER_FORMAT
 
 async def ger_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -373,21 +369,21 @@ async def ger_format(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     context.user_data["format"] = mapping.get(query.data, "Egal")
 
-    await query.edit_message_text("Wann möchtest du starten? (z.B. sofort / Januar / nächstes Monat)",
+    await query.edit_message_text("Качан баштагыңыз келет? (мисалы: дароо / январь / кийинки ай)",
                                   reply_markup=cancel_kb())
     return GER_START
 
 async def ger_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     start_time = clean_user_text(update.message.text)
     if len(start_time) < 2:
-        await update.message.reply_text("Bitte gib einen Startzeitpunkt an 🙂", reply_markup=cancel_kb())
+        await update.message.reply_text("Сураныч, баштоо убактысын жазыңыз 🙂", reply_markup=cancel_kb())
         return GER_START
 
     context.user_data["start"] = start_time
 
     summary = (
-        "✅ Bitte prüfen:\n\n"
-        "Flow: Deutschkurs\n"
+        "✅ Сураныч, текшериңиз:\n\n"
+        "Flow: Немис курсу\n"
         f"Name: {context.user_data['name']}\n"
         f"Kontakt: {context.user_data['contact']}\n"
         f"Niveau: {context.user_data['level']}\n"
@@ -417,14 +413,14 @@ async def ger_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         who = f"User: @{u.username}" if u.username else f"User ID: {u.id}"
-        admin_msg = "📩 Neue Anmeldung (Deutschkurs)\n\n" + who + "\n\n" + context.user_data.get("summary", "")
+        admin_msg = "📩 Немис тили курсуна жаңы катталуу\n\n" + who + "\n\n" + context.user_data.get("summary", "")
 
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_msg)
         except Exception as e:
             logger.warning("Admin notify failed: %s", e)
 
-        await query.edit_message_text("🎉 Danke! Du bist angemeldet. Wir melden uns bald bei dir.",
+        await query.edit_message_text("🎉 Рахмат! Катталуу ийгиликтүү болду 😊 Жакында сизге байланышабыз.",
                                       reply_markup=main_menu_kb())
         context.user_data.clear()
         return CHOOSE_FLOW
