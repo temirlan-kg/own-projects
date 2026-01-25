@@ -17,7 +17,7 @@ from telegram.ext import (
 # ======================
 # CONFIG
 # ======================
-BOT_TOKEN = "8171121939:AAGYMWu2Up1bkZMTgYeePnLem1U3UyZRY3c"
+BOT_TOKEN = "8171121939:AAGpbWNiiFsO0vvxkD-oVBoy4ZnWzD0mnLc"
 ADMIN_CHAT_ID = 703296214
 DB_PATH = "signups.db"
 
