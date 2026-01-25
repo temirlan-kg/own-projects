@@ -1,29 +1,32 @@
-# Telegram Chatbot – Study Counseling & German Learning (Kyrgyz)
+# 🤖 Telegram Chatbot – Study Counseling & German Learning (Kyrgyz)
 
-## Project Description
-
-This project is a **Telegram chatbot** created to support **Kyrgyz-speaking users** with:
-
-- Study counseling for universities in Germany
-- Learning the German language with explanations in Kyrgyz
-
-The chatbot aims to make information about studying and living in Germany more accessible and easier to understand.
+A Telegram chatbot designed to support **Kyrgyz-speaking users** with
+study counseling and German language learning.
 
 ---
 
-## Target Audience
+## 📌 Project Description
+
+This project is a **Telegram chatbot** created to help Kyrgyz-speaking users with:
+
+- 🎓 Study counseling for universities in Germany
+- 🇩🇪 Learning the German language with explanations in Kyrgyz
+
+The chatbot aims to make information about **studying and living in Germany**
+more accessible and easier to understand.
+
+---
+
+## 👥 Target Audience
 
 - Kyrgyz-speaking students who want to study in Germany
-- People looking for guidance about:
-  - Universities in Germany
-  - Study programs
-  - Application processes
-  - Admission and language requirements
-- German language learners who prefer explanations in Kyrgyz
+- People looking for guidance on:
+  - Universities and higher education institutions
+  - Application processes and requirements
 
 ---
 
-## Features
+## ✨ Features
 
 - Telegram-based chatbot
 - Study counseling:
@@ -38,15 +41,17 @@ The chatbot aims to make information about studying and living in Germany more a
 
 ---
 
-## Technologies Used
+## 🛠 Technologies Used
 
 - Python
 - Telegram Bot API
 
 ---
 
-## Installation
+## 🚀 Installation
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
+```bash
+git clone https://github.com/temirlan-kg/own-projects.git
+cd own-projects
+pip install -r requirements.txt
+
